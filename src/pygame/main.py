@@ -44,7 +44,7 @@ while run:
     world.draw(screen, camera_x, camera_y)
     for enemy in world.get_group:
         enemy.update()
-    player.update(world, screen, SCREEN_HEIGHT, camera_x, camera_y)
+    player.update(world, screen, camera_x, camera_y)
 
     # Overlay the darken surface to make the screen darker
     screen.blit(darken_surface, (0, 0))

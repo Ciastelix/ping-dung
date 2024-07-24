@@ -38,7 +38,23 @@ class Player:
         self.vel_y = 0
         self.direction = 0
 
-    def update(self, world, screen, sc_h, camera_x, camera_y):
+    def check_collision(self, dx, dy, world):
+        new_rect = self.rect.copy()
+        new_rect.x += dx
+        new_rect.y += dy
+        # Check all four corners
+        corners = [
+            (new_rect.left, new_rect.top),
+            (new_rect.right, new_rect.top),
+            (new_rect.left, new_rect.bottom),
+            (new_rect.right, new_rect.bottom),
+        ]
+        for corner in corners:
+            if world.get_tile_at(*corner) == " ":
+                return True
+        return False
+
+    def update(self, world, screen, camera_x, camera_y):
         dx = 0
         dy = 0
         move_speed = 5
@@ -77,29 +93,11 @@ class Player:
             if self.direction == -1:
                 self.image = self.images_left[self.index]
 
-        # Temporarily move the player and check for collisions
-        self.rect.x += dx
-        collision_x = False
-        if world.get_tile_at(self.rect.right, self.rect.y) == " ":
-            collision_x = True
-        if world.get_tile_at(self.rect.left, self.rect.y) == " ":
-            collision_x = True
-
-        # If there's a collision, revert the movement
-        if collision_x:
-            self.rect.x -= dx
-
-        # Apply vertical movement
-        self.rect.y += dy
-        collision_y = False
-        if world.get_tile_at(self.rect.x, self.rect.bottom) == " ":
-            collision_y = True
-        if world.get_tile_at(self.rect.x, self.rect.top) == " ":
-            collision_y = True
-
-        # If there's a collision, revert the movement
-        if collision_y:
-            self.rect.y -= dy
+        # Check collisions and update position
+        if not self.check_collision(dx, 0, world):
+            self.rect.x += dx
+        if not self.check_collision(0, dy, world):
+            self.rect.y += dy
 
         # Draw player onto screen with camera offset
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
