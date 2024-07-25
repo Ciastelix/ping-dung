@@ -101,6 +101,36 @@ def draw_transition(screen, elapsed_time):
     screen.blit(text_surface, text_rect)
 
 
+# Step 1: Create a Circle Mask
+def create_vision_mask(screen_width, screen_height, radius):
+    # Create a surface with per-pixel alpha
+    mask_surface = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
+    # Fill with a semi-transparent black color
+    mask_surface.fill((0, 0, 0, 128))
+    # Draw a transparent circle in the middle
+    pygame.draw.circle(
+        mask_surface, (0, 0, 0, 0), (screen_width // 2, screen_height // 2), radius
+    )
+    return mask_surface
+
+
+# Step 2: Position the Circle Around the Player
+def update_vision_mask(mask_surface, player_x, player_y, screen_width, screen_height):
+    # Clear the mask first
+    mask_surface.fill((0, 0, 0, 128))
+    # Calculate the circle's position based on the player's position
+    circle_x = player_x - screen_width // 2
+    circle_y = player_y - screen_height // 2
+    # Draw the transparent circle around the player
+    pygame.draw.circle(
+        mask_surface, (0, 0, 0, 0), (-circle_x, -circle_y), 150
+    )  # 150 is the radius
+
+
+vision_mask = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+radius = 100  # Vision radius
+
+
 # In your main game loop
 while run:
     clock.tick(fps)
@@ -124,7 +154,7 @@ while run:
             pygame.mixer.music.set_volume(0.2)
     else:
         screen.blit(bg_image, (0, 0))
-
+        vision_mask = create_vision_mask(SCREEN_WIDTH, SCREEN_HEIGHT, 150)
         # Update camera position based on player position
         camera_x = player.rect.x - SCREEN_WIDTH // 2
         camera_y = player.rect.y - SCREEN_HEIGHT // 2
@@ -137,10 +167,18 @@ while run:
             transition_active = True
             transition_start_time = pygame.time.get_ticks()
 
-        draw_level_counter(screen, level)
+        vision_mask.fill((0, 0, 0, 128))  # Semi-transparent fill
+        pygame.draw.circle(
+            vision_mask,
+            (0, 0, 0, 0),
+            (player.rect.x - camera_x + 20, player.rect.y - camera_y + 20),
+            radius,
+        )  # Transparent circle
+        screen.blit(vision_mask, (0, 0))
 
-        # Overlay the darken surface to make the screen darker
         screen.blit(darken_surface, (0, 0))
+        draw_level_counter(screen, level)
+    pygame.display.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

@@ -42,6 +42,7 @@ class Player:
         new_rect = self.rect.copy()
         new_rect.x += dx
         new_rect.y += dy
+        # Check all four corners
         corners = [
             (new_rect.left, new_rect.top),
             (new_rect.right, new_rect.top),
@@ -61,6 +62,8 @@ class Player:
         dy = 0
         move_speed = 5
         walk_cooldown = 5
+
+        # Get key presses
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
             dx -= move_speed
@@ -72,7 +75,9 @@ class Player:
             dy -= move_speed
         if key[pygame.K_DOWN]:
             dy += move_speed
-        if dx != 0 or dy != 0:
+
+        # Handle animation
+        if dx != 0 or dy != 0:  # Update animation if moving
             self.counter += 1
             if self.counter > walk_cooldown:
                 self.counter = 0
@@ -90,8 +95,12 @@ class Player:
                 self.image = self.images_right[self.index]
             if self.direction == -1:
                 self.image = self.images_left[self.index]
+
+        # Check collisions and update position
         if not self.check_collision(dx, 0, world):
             self.rect.x += dx
         if not self.check_collision(0, dy, world):
             self.rect.y += dy
+
+        # Draw player onto screen with camera offset
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
