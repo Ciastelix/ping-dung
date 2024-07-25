@@ -154,7 +154,7 @@ while run:
             pygame.mixer.music.set_volume(0.2)
     else:
         screen.blit(bg_image, (0, 0))
-        vision_mask = create_vision_mask(SCREEN_WIDTH, SCREEN_HEIGHT, 150)
+
         # Update camera position based on player position
         camera_x = player.rect.x - SCREEN_WIDTH // 2
         camera_y = player.rect.y - SCREEN_HEIGHT // 2
