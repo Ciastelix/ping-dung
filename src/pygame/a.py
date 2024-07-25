@@ -2,6 +2,7 @@ import pygame
 import random
 import sys
 import heapq
+from button import Button
 
 # Initialize Pygame
 pygame.init()
@@ -219,13 +220,16 @@ def main():
     game_map, entrance_pos = generate_dungeon()
     player = Player(entrance_pos[0] * TILE_SIZE, entrance_pos[1] * TILE_SIZE)
     all_sprites = pygame.sprite.Group(player)
+    play_button = pygame.image.load("play.png")
 
+    play_button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, play_button)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
+        clock.tick(60)
         keys = pygame.key.get_pressed()
         all_sprites.update(keys, game_map)
 
@@ -233,7 +237,7 @@ def main():
         draw_dungeon(game_map)
         all_sprites.draw(screen)
         pygame.display.flip()
-        clock.tick(60)
+        play_button.draw(screen)
 
 
 if __name__ == "__main__":

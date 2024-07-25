@@ -54,6 +54,9 @@ class Player:
                 return True
         return False
 
+    def on_portal_tile(self, world):
+        return world.get_tile_at(self.rect.centerx, self.rect.centery) == "P"
+
     def update(self, world, screen, camera_x, camera_y):
         dx = 0
         dy = 0
