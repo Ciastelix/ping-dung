@@ -164,7 +164,6 @@ def generate_dungeon():
         ):  # Ensure the position is inside the room and not a door
             game_map[p_y][p_x] = "P"
             break
-
     return game_map, (e_x, e_y)
 
 
@@ -186,40 +185,10 @@ def draw_dungeon(game_map):
                 pygame.draw.rect(screen, BLUE, rect)  # Player in blue
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill(BLUE)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.move_speed = 5
-
-    def update(self, keys, game_map):
-        dx, dy = 0, 0
-        if keys[pygame.K_LEFT]:
-            dx = -self.move_speed
-        if keys[pygame.K_RIGHT]:
-            dx = self.move_speed
-        if keys[pygame.K_UP]:
-            dy = -self.move_speed
-        if keys[pygame.K_DOWN]:
-            dy = self.move_speed
-
-        # Check for collision with walls (" ")
-        new_x = self.rect.x + dx
-        new_y = self.rect.y + dy
-        if game_map[new_y // TILE_SIZE][new_x // TILE_SIZE] != " ":
-            self.rect.x += dx
-        if game_map[new_y // TILE_SIZE][self.rect.x // TILE_SIZE] != " ":
-            self.rect.y += dy
-
-
 def main():
     clock = pygame.time.Clock()
     game_map, entrance_pos = generate_dungeon()
-    player = Player(entrance_pos[0] * TILE_SIZE, entrance_pos[1] * TILE_SIZE)
-    all_sprites = pygame.sprite.Group(player)
+
     play_button = pygame.image.load("play.png")
 
     play_button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, play_button)
@@ -231,11 +200,10 @@ def main():
 
         clock.tick(60)
         keys = pygame.key.get_pressed()
-        all_sprites.update(keys, game_map)
 
         screen.fill(BLACK)
         draw_dungeon(game_map)
-        all_sprites.draw(screen)
+
         pygame.display.flip()
         play_button.draw(screen)
 

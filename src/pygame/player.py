@@ -28,7 +28,7 @@ class Player:
         self.direction = 0
         for i in range(1, 11):
             img_right = images[i]
-            img_right = pygame.transform.scale(img_right, (40, 40))
+            img_right = pygame.transform.scale(img_right, (40, 45))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
             self.images_left.append(img_left)

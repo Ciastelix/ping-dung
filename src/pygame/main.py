@@ -1,11 +1,11 @@
 import pygame
+import random
 from world import World
 from player import Player
 from a import generate_dungeon
 from button import Button
-import time
-import math
-from config import SCREEN_WIDTH, SCREEN_HEIGHT
+from transition import draw_transition, start_transition
+from config import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -15,16 +15,13 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Marrio")
 menu = pygame.image.load("menu.png")
 menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.mixer.music.load(
-    "menu.mp3"
-)  # Replace "menu_music.mp3" with the path to your music file
+pygame.mixer.music.load("menu.mp3")
 pygame.mixer.music.set_volume(0.2)
-pygame.mixer.music.play(-1)  # Play the music indefinitely
+pygame.mixer.music.play(-1)
 
 bg_image = pygame.image.load("bg.webp")
 play_button_image = pygame.image.load("play.png")
 
-# scale the play button image times 3
 play_button_image = pygame.transform.scale(
     play_button_image,
     (play_button_image.get_width() * 3, play_button_image.get_height() * 3),
@@ -33,15 +30,12 @@ darken_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
 darken_surface.fill((0, 0, 0))
 darken_surface.set_alpha(128)
 
-# Replace this with your world data generation
-world_data = generate_dungeon()  # Make sure this returns the correct format
+world_data = generate_dungeon()
 
-# Create the world and get the starting position
 world = World(world_data[0])
 starting_position = world.get_starting_position
 main_menu = True
 
-# Create the player at the starting position
 player = Player(*starting_position)
 play_button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, play_button_image)
 level = 1
@@ -50,11 +44,11 @@ camera_x = 0
 camera_y = 0
 run = True
 transition = False
-transition_start_time = 0
-transition_time = 1000  # 1 second
-transition_start_time = None
+transition_time = 1000
 transition_active = False
-transition_text = "You go deeper..."
+
+enemy_spawn_time = 4000  # 4 seconds
+last_spawn_time = pygame.time.get_ticks()
 
 
 def draw_level_counter(screen, level):
@@ -62,47 +56,38 @@ def draw_level_counter(screen, level):
     screen.blit(level_text, (10, 10))
 
 
-def start_transition():
-    global transition, transition_start_time
-    transition = True
-    transition_start_time = pygame.time.get_ticks()
-
-
 def load_next_level():
     global world, player, world_data, transition, level
     transition = False
-    world_data = generate_dungeon()  # Generate new level data
-    world = World(world_data[0])  # Load new world
-    starting_position = world.get_starting_position  # Get new starting position
-    player.rect.x, player.rect.y = (
-        starting_position  # Move player to new starting position
-    )
+    world_data = generate_dungeon()
+    world = World(world_data[0])
+    starting_position = world.get_starting_position
+    player.rect.x, player.rect.y = starting_position
     level += 1
 
 
-def draw_transition(screen, elapsed_time):
-    progress = elapsed_time / transition_time
-    alpha = math.sin(progress * math.pi / 2)  # Ease-in and ease-out
-    black_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    black_surface.fill((0, 0, 0))
-    black_surface.set_alpha(int(alpha * 255))
-
-    screen.blit(black_surface, (0, 0))
-
-    if elapsed_time < transition_time / 2:
-        alpha_text = alpha * 2  # Ease-in for the text
-    else:
-        alpha_text = (1 - alpha) * 2  # Ease-out for the text
-
-    text_surface = font.render(transition_text, True, (255, 255, 255))
-    text_surface.set_alpha(int(alpha_text * 255))
-    text_rect = text_surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
-    screen.blit(text_surface, text_rect)
+def spawn_enemy_in_random_location():
+    current_time = pygame.time.get_ticks()
+    global last_spawn_time
+    if current_time - last_spawn_time >= enemy_spawn_time:
+        last_spawn_time = current_time
+        valid_positions = world.get_valid_enemy_positions()
+        if valid_positions:
+            random_position = random.choice(valid_positions)
+            if not player_is_in_position(random_position):
+                world.spawn_enemy(random_position)
 
 
-# In your main game loop
+def player_is_in_position(position):
+    player_rect = player.rect
+    return player_rect.colliderect(
+        pygame.Rect(position[0], position[1], TILE_SIZE, TILE_SIZE)
+    )
+
+
 while run:
     clock.tick(fps)
+    spawn_enemy_in_random_location()
 
     if transition_active:
         elapsed_time = pygame.time.get_ticks() - transition_start_time
@@ -124,7 +109,6 @@ while run:
     else:
         screen.blit(bg_image, (0, 0))
 
-        # Update camera position based on player position
         camera_x = player.rect.x - SCREEN_WIDTH // 2
         camera_y = player.rect.y - SCREEN_HEIGHT // 2
 
