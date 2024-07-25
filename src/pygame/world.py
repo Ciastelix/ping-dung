@@ -1,12 +1,12 @@
 import pygame
 from enemy import Enemy
+from config import TILE_SIZE
 
-tile_size = 50
 
 brick = pygame.image.load("brick.png")
-brick = pygame.transform.scale(brick, (tile_size, tile_size))
+brick = pygame.transform.scale(brick, (TILE_SIZE, TILE_SIZE))
 frame = pygame.image.load("frame.png")
-frame = pygame.transform.scale(frame, (tile_size, tile_size))
+frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
 
 
 class World:
@@ -21,63 +21,63 @@ class World:
             for tile in row:
                 if tile == "E":  # Entrance tile
                     self.starting_position = (
-                        col_count * tile_size,
-                        row_count * tile_size,
+                        col_count * TILE_SIZE,
+                        row_count * TILE_SIZE,
                     )
                 if tile == "R":  # Room tile
                     img = brick
                     img_rect = img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
+                    img_rect.x = col_count * TILE_SIZE
+                    img_rect.y = row_count * TILE_SIZE
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
                 elif tile == ".":  # Corridor tile
                     img = frame
                     img_rect = img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
+                    img_rect.x = col_count * TILE_SIZE
+                    img_rect.y = row_count * TILE_SIZE
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
 
                 # elif tile == "3":  # Enemy tile
-                #     enemy = Enemy(col_count * tile_size, row_count * tile_size)
+                #     enemy = Enemy(col_count * TILE_SIZE, row_count * TILE_SIZE)
                 #     self.cobra_group.add(enemy)
                 elif tile == "D":
                     # Create a red surface for "D" tiles
-                    red_img = pygame.Surface((tile_size, tile_size))
+                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
                     red_img.fill((255, 0, 0))  # Fill surface with red color
                     img_rect = red_img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
+                    img_rect.x = col_count * TILE_SIZE
+                    img_rect.y = row_count * TILE_SIZE
                     tile = (red_img, img_rect)
                     self.tile_list.append(tile)
                 elif tile == "E":
                     # Create a red surface for "D" tiles
-                    red_img = pygame.Surface((tile_size, tile_size))
+                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
                     # yellow
                     red_img.fill((255, 255, 0))
                     img_rect = red_img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
+                    img_rect.x = col_count * TILE_SIZE
+                    img_rect.y = row_count * TILE_SIZE
                     tile = (red_img, img_rect)
                     self.tile_list.append(tile)
                 elif tile == "P":
                     # Create a red surface for "D" tiles
-                    red_img = pygame.Surface((tile_size, tile_size))
+                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
                     # blue
                     red_img.fill((0, 0, 255))
                     img_rect = red_img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
+                    img_rect.x = col_count * TILE_SIZE
+                    img_rect.y = row_count * TILE_SIZE
                     tile = (red_img, img_rect)
                     self.tile_list.append(tile)
                 elif tile == " ":
-                    red_img = pygame.Surface((tile_size, tile_size))
+                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
                     # blue
                     red_img.fill((255, 255, 255))
                     img_rect = red_img.get_rect()
-                    img_rect.x = col_count * tile_size
-                    img_rect.y = row_count * tile_size
+                    img_rect.x = col_count * TILE_SIZE
+                    img_rect.y = row_count * TILE_SIZE
                     tile = (red_img, img_rect)
                     self.tile_list.append(tile)
                 col_count += 1
@@ -91,7 +91,7 @@ class World:
 
     def get_tile_at(self, x, y):
         try:
-            return self.world_data[y // tile_size][x // tile_size]
+            return self.world_data[y // TILE_SIZE][x // TILE_SIZE]
         except IndexError:
             return " "
 

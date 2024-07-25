@@ -1,5 +1,6 @@
 import pygame
 from PIL import Image, ImageSequence
+from config import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
 def gif_to_frames(filename):
@@ -16,6 +17,9 @@ def gif_to_frames(filename):
 
 class Player:
     def __init__(self, x, y):
+        self.vision_mask = pygame.Surface(
+            (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA
+        )
         images = gif_to_frames("doux.gif")
         self.index = 0
         self.counter = 0
@@ -104,3 +108,12 @@ class Player:
 
         # Draw player onto screen with camera offset
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
+
+        self.vision_mask.fill((0, 0, 0, 128))  # Semi-transparent fill
+        pygame.draw.circle(
+            self.vision_mask,
+            (0, 0, 0, 0),
+            (self.rect.x - camera_x + 20, self.rect.y - camera_y + 20),
+            100,
+        )  # Transparent circle
+        screen.blit(self.vision_mask, (0, 0))

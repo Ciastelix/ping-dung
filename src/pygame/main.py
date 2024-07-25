@@ -5,13 +5,12 @@ from a import generate_dungeon
 from button import Button
 import time
 import math
+from config import SCREEN_WIDTH, SCREEN_HEIGHT
 
 pygame.init()
 clock = pygame.time.Clock()
 fps = 60
 
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 1000
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Marrio")
 menu = pygame.image.load("menu.png")
@@ -101,36 +100,6 @@ def draw_transition(screen, elapsed_time):
     screen.blit(text_surface, text_rect)
 
 
-# Step 1: Create a Circle Mask
-def create_vision_mask(screen_width, screen_height, radius):
-    # Create a surface with per-pixel alpha
-    mask_surface = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
-    # Fill with a semi-transparent black color
-    mask_surface.fill((0, 0, 0, 128))
-    # Draw a transparent circle in the middle
-    pygame.draw.circle(
-        mask_surface, (0, 0, 0, 0), (screen_width // 2, screen_height // 2), radius
-    )
-    return mask_surface
-
-
-# Step 2: Position the Circle Around the Player
-def update_vision_mask(mask_surface, player_x, player_y, screen_width, screen_height):
-    # Clear the mask first
-    mask_surface.fill((0, 0, 0, 128))
-    # Calculate the circle's position based on the player's position
-    circle_x = player_x - screen_width // 2
-    circle_y = player_y - screen_height // 2
-    # Draw the transparent circle around the player
-    pygame.draw.circle(
-        mask_surface, (0, 0, 0, 0), (-circle_x, -circle_y), 150
-    )  # 150 is the radius
-
-
-vision_mask = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-radius = 100  # Vision radius
-
-
 # In your main game loop
 while run:
     clock.tick(fps)
@@ -166,15 +135,6 @@ while run:
         if player.on_portal_tile(world):
             transition_active = True
             transition_start_time = pygame.time.get_ticks()
-
-        vision_mask.fill((0, 0, 0, 128))  # Semi-transparent fill
-        pygame.draw.circle(
-            vision_mask,
-            (0, 0, 0, 0),
-            (player.rect.x - camera_x + 20, player.rect.y - camera_y + 20),
-            radius,
-        )  # Transparent circle
-        screen.blit(vision_mask, (0, 0))
 
         screen.blit(darken_surface, (0, 0))
         draw_level_counter(screen, level)
