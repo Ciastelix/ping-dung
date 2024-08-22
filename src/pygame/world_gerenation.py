@@ -35,12 +35,17 @@ dirt_img = pygame.transform.scale(dirt_img, (TILE_SIZE, TILE_SIZE))
 grass_img = pygame.transform.scale(grass_img, (TILE_SIZE, TILE_SIZE))
 
 
+import random
+import heapq
+
+
 def generate_dungeon():
     game_map = [[" " for _ in range(WIDTH)] for _ in range(HEIGHT)]
     rooms = []
     attempts = 0  # Counter to prevent infinite loops
     max_attempts = 200  # Maximum attempts to place rooms
 
+    # Step 1: Generate rooms
     while len(rooms) < MIN_ROOMS and attempts < max_attempts:
         w = random.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
         h = random.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
@@ -52,16 +57,13 @@ def generate_dungeon():
         )  # Leave a 2-tile buffer on the top and bottom
 
         new_room = {"x1": x, "y1": y, "x2": x + w, "y2": y + h}
-        overlap = False
-        for room in rooms:
-            if (
-                new_room["x1"] - 1 <= room["x2"]
-                and new_room["x2"] + 1 >= room["x1"]
-                and new_room["y1"] - 1 <= room["y2"]
-                and new_room["y2"] + 1 >= room["y1"]
-            ):
-                overlap = True
-                break
+        overlap = any(
+            new_room["x1"] - 1 <= room["x2"]
+            and new_room["x2"] + 1 >= room["x1"]
+            and new_room["y1"] - 1 <= room["y2"]
+            and new_room["y2"] + 1 >= room["y1"]
+            for room in rooms
+        )
 
         if not overlap:
             rooms.append(new_room)
@@ -75,13 +77,13 @@ def generate_dungeon():
         print("Not enough rooms were created. Please try again.")
         sys.exit()
 
-    # Get the center points of all rooms
+    # Step 2: Get the center points of all rooms
     room_centers = [
         ((room["x1"] + room["x2"]) // 2, (room["y1"] + room["y2"]) // 2)
         for room in rooms
     ]
 
-    # Prim's algorithm to create a MST
+    # Step 3: Create corridors using Prim's algorithm to form a minimum spanning tree
     connected_rooms = {room_centers[0]}
     edges = [
         (abs(cx1 - cx2) + abs(cy1 - cy2), (cx1, cy1), (cx2, cy2))
@@ -117,38 +119,28 @@ def generate_dungeon():
                     if game_map[cy2][x] == " ":
                         game_map[cy2][x] = "."
 
-    def is_adjacent_to_door(x, y):
-        adjacent_tiles = [
-            (x + dx, y + dy) for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        ]
-        return any(
-            0 <= adj_x < WIDTH and 0 <= adj_y < HEIGHT and game_map[adj_y][adj_x] == "D"
-            for adj_x, adj_y in adjacent_tiles
-        )
-
+    # Step 4: Place doors only at corridor tiles adjacent to rooms
     for room in rooms:
-        room_doors = set()
-        for x in range(room["x1"] - 1, room["x2"] + 2):
-            for y in range(room["y1"] - 1, room["y2"] + 2):
-                if game_map[y][x] == "R":
-                    adjacent_corridors = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-                    for dx, dy in adjacent_corridors:
-                        if game_map[y + dy][x + dx] == "." and not is_adjacent_to_door(
-                            x, y
-                        ):
-                            if (x, y) not in room_doors:
-                                game_map[y][x] = "D"
-                                room_doors.add((x, y))
-                            break
+        for x in range(room["x1"] - 1, room["x2"] + 1):
+            for y in range(room["y1"] - 1, room["y2"] + 1):
+                if game_map[y][x] == ".":
+                    # Check if the corridor is adjacent to a room (valid door position)
+                    if (
+                        (x > 0 and game_map[y][x - 1] == "R")
+                        or (x < WIDTH - 1 and game_map[y][x + 1] == "R")
+                        or (y > 0 and game_map[y - 1][x] == "R")
+                        or (y < HEIGHT - 1 and game_map[y + 1][x] == "R")
+                    ):
+                        game_map[y][x] = "D"  # Place door
 
+    # Step 5: Place the entrance in the center of the first room
     entrance_room = rooms[0] if rooms else None
     if entrance_room:
-        # Place the entrance in the center of the entrance room
         e_x = (entrance_room["x1"] + entrance_room["x2"]) // 2
         e_y = (entrance_room["y1"] + entrance_room["y2"]) // 2
         game_map[e_y][e_x] = "E"
 
-    # Ensure "P" is not in the same room as "E"
+    # Step 6: Place the player (P) in a random room, avoiding the entrance room
     rooms_without_entrance = [room for room in rooms if room != entrance_room]
     selected_room_for_p = random.choice(rooms_without_entrance)
 
@@ -159,11 +151,10 @@ def generate_dungeon():
         p_y = random.randint(
             selected_room_for_p["y1"] + 1, selected_room_for_p["y2"] - 1
         )
-        if (
-            game_map[p_y][p_x] == "R"
-        ):  # Ensure the position is inside the room and not a door
+        if game_map[p_y][p_x] == "R":  # Ensure the position is inside the room
             game_map[p_y][p_x] = "P"
             break
+
     return game_map, (e_x, e_y)
 
 

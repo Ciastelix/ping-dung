@@ -2,11 +2,14 @@ import pygame
 import random
 from world import World
 from player import Player
-from a import generate_dungeon
+from world_gerenation import generate_dungeon
 from button import Button
+from pygame import mixer
 from transition import draw_transition, start_transition
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 
+pygame.mixer.pre_init(44100, -16, 2, 512)
+mixer.init()
 pygame.init()
 clock = pygame.time.Clock()
 fps = 60
@@ -15,10 +18,12 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Marrio")
 menu = pygame.image.load("menu.png")
 menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.mixer.music.load("menu.mp3")
-pygame.mixer.music.set_volume(0.2)
-pygame.mixer.music.play(-1)
+menu_music = pygame.mixer.Sound("menu.mp3")
 
+
+menu_music.set_volume(0.2)
+game_music = pygame.mixer.Sound("game.mp3")
+game_music.set_volume(0.2)
 bg_image = pygame.image.load("bg.webp")
 play_button_image = pygame.image.load("play.png")
 
@@ -85,6 +90,14 @@ def player_is_in_position(position):
     )
 
 
+def calculate_walking_animation_duration(player, fps=60):
+    number_of_frames = len(player.images_right)
+    walk_cooldown = 5
+    duration = (number_of_frames * walk_cooldown) / fps
+    return duration
+
+
+menu_music.play(-1)
 while run:
     clock.tick(fps)
     spawn_enemy_in_random_location()
@@ -99,16 +112,17 @@ while run:
             level += 1
 
     elif main_menu:
+
         screen.blit(menu, (0, 0))
         if play_button.draw(screen):
             main_menu = False
-            pygame.mixer.music.stop()
-            pygame.mixer.music.load("game.mp3")
-            pygame.mixer.music.play(-1)
-            pygame.mixer.music.set_volume(0.2)
-    else:
-        screen.blit(bg_image, (0, 0))
+            menu_music.stop()
 
+    else:
+
+        if game_music.get_num_channels() == 0:
+            game_music.play()
+        screen.blit(bg_image, (0, 0))
         camera_x = player.rect.x - SCREEN_WIDTH // 2
         camera_y = player.rect.y - SCREEN_HEIGHT // 2
 

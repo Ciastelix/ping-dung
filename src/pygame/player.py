@@ -1,6 +1,7 @@
 import pygame
 from PIL import Image, ImageSequence
 from config import SCREEN_HEIGHT, SCREEN_WIDTH
+from pygame import mixer
 
 
 def gif_to_frames(filename):
@@ -22,6 +23,10 @@ class Player:
         )
         images = gif_to_frames("doux.gif")
         self.index = 0
+        pygame.mixer.pre_init(44100, -16, 2, 512)
+        mixer.init()
+        self.walk_music = pygame.mixer.Sound("walk.mp3")
+        self.walk_music.set_volume(1000.2)
         self.counter = 0
         self.images_right = []
         self.images_left = []
@@ -70,14 +75,22 @@ class Player:
         # Get key presses
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
+            if self.walk_music.get_num_channels() == 0:
+                self.walk_music.play()
             dx -= move_speed
             self.direction = -1
         if key[pygame.K_RIGHT]:
+            if self.walk_music.get_num_channels() == 0:
+                self.walk_music.play()
             dx += move_speed
             self.direction = 1
         if key[pygame.K_UP]:
+            if self.walk_music.get_num_channels() == 0:
+                self.walk_music.play()
             dy -= move_speed
         if key[pygame.K_DOWN]:
+            if self.walk_music.get_num_channels() == 0:
+                self.walk_music.play()
             dy += move_speed
 
         # Handle animation
@@ -109,7 +122,7 @@ class Player:
         # Draw player onto screen with camera offset
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
 
-        self.vision_mask.fill((0, 0, 0, 128))  # Semi-transparent fill
+        self.vision_mask.fill((0, 0, 0, 250))  # Semi-transparent fill
         pygame.draw.circle(
             self.vision_mask,
             (0, 0, 0, 0),
