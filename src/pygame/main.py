@@ -31,9 +31,7 @@ play_button_image = pygame.transform.scale(
     play_button_image,
     (play_button_image.get_width() * 3, play_button_image.get_height() * 3),
 )
-darken_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-darken_surface.fill((0, 0, 0))
-darken_surface.set_alpha(128)
+
 
 world_data = generate_dungeon()
 
@@ -98,6 +96,7 @@ def calculate_walking_animation_duration(player, fps=60):
 
 
 menu_music.play(-1)
+# Inside the main game loop in main.py
 while run:
     clock.tick(fps)
     spawn_enemy_in_random_location()
@@ -112,30 +111,25 @@ while run:
             level += 1
 
     elif main_menu:
-
         screen.blit(menu, (0, 0))
         if play_button.draw(screen):
             main_menu = False
             menu_music.stop()
 
     else:
-
         if game_music.get_num_channels() == 0:
             game_music.play()
         screen.blit(bg_image, (0, 0))
         camera_x = player.rect.x - SCREEN_WIDTH // 2
         camera_y = player.rect.y - SCREEN_HEIGHT // 2
 
-        world.draw(screen, camera_x, camera_y)
-        for enemy in world.get_group:
-            enemy.update()
-        player.update(world, screen, camera_x, camera_y)
+        world.draw(screen, camera_x, camera_y, player)
         if player.on_portal_tile(world):
             transition_active = True
             transition_start_time = pygame.time.get_ticks()
 
-        screen.blit(darken_surface, (0, 0))
         draw_level_counter(screen, level)
+
     pygame.display.update()
 
     for event in pygame.event.get():

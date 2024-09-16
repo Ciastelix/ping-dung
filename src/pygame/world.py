@@ -5,16 +5,19 @@ from config import TILE_SIZE
 brick = pygame.image.load("brick.png")
 brick = pygame.transform.scale(brick, (TILE_SIZE, TILE_SIZE))
 frame = pygame.image.load("frame.png")
-frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
+black_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
+black_img.fill((0, 0, 0))
 
 
 class World:
     def __init__(self, data):
         self.world_data = data
         self.tile_list = []
+        self.empty_tiles = []  # List to store empty tiles
         self.starting_position = (0, 0)
         self.cobra_group = pygame.sprite.Group()
         self.rooms_and_corridors = []  # List to store room and corridor positions
+
         row_count = 0
         for row in data:
             col_count = 0
@@ -69,20 +72,27 @@ class World:
                     tile = (red_img, img_rect)
                     self.tile_list.append(tile)
                 elif tile == " ":
-                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
-                    red_img.fill((255, 255, 255))
-                    img_rect = red_img.get_rect()
-                    img_rect.x = col_count * TILE_SIZE
-                    img_rect.y = row_count * TILE_SIZE
-                    tile = (red_img, img_rect)
-                    self.tile_list.append(tile)
+                    self.empty_tiles.append((col_count, row_count))
 
                 col_count += 1
             row_count += 1
 
-    def draw(self, screen, camera_x, camera_y):
+    def draw(self, screen, camera_x, camera_y, player):
+        # Draw all tiles except empty tiles
         for tile in self.tile_list:
             screen.blit(tile[0], (tile[1].x - camera_x, tile[1].y - camera_y))
+
+        # Draw player
+        player.update(self, screen, camera_x, camera_y)
+
+        # Draw empty tiles as black
+        for col_count, row_count in self.empty_tiles:
+            img_rect = black_img.get_rect()
+            img_rect.x = col_count * TILE_SIZE
+            img_rect.y = row_count * TILE_SIZE
+            screen.blit(black_img, (img_rect.x - camera_x, img_rect.y - camera_y))
+
+        # Draw enemies
         for enemy in self.cobra_group:
             enemy.draw(screen, camera_x, camera_y)
 
@@ -104,6 +114,7 @@ class World:
         return self.rooms_and_corridors
 
     def spawn_enemy(self, position):
-        enemy_x, enemy_y = position
-        enemy = Enemy(enemy_x, enemy_y)
-        self.cobra_group.add(enemy)
+        pass
+        # enemy_x, enemy_y = position
+        # enemy = Enemy(enemy_x, enemy_y)
+        # self.cobra_group.add(enemy)
