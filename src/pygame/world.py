@@ -1,9 +1,23 @@
 import pygame
 from enemy import Enemy
 from config import TILE_SIZE
+from random import choice
 
 brick = pygame.image.load("brick.png")
 brick = pygame.transform.scale(brick, (TILE_SIZE, TILE_SIZE))
+stairs = pygame.image.load("stairs.png")
+stairs = pygame.transform.scale(stairs, (TILE_SIZE, TILE_SIZE))
+door = pygame.image.load("door.png")
+door = pygame.transform.scale(door, (TILE_SIZE, TILE_SIZE))
+opened_door = pygame.image.load("opened_door.png")
+opened_door = pygame.transform.scale(opened_door, (TILE_SIZE, TILE_SIZE))
+bricks = [
+    brick,
+    pygame.transform.rotate(brick, 90),
+    pygame.transform.rotate(brick, 90),
+    pygame.transform.rotate(brick, 90),
+]
+
 frame = pygame.image.load("frame.png")
 black_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
 black_img.fill((0, 0, 0))
@@ -28,7 +42,7 @@ class World:
                         row_count * TILE_SIZE,
                     )
                 if tile == "R":
-                    img = brick
+                    img = choice(bricks)
                     img_rect = img.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
@@ -48,28 +62,22 @@ class World:
                         (img_rect.x, img_rect.y)
                     )  # Add corridor position to list
                 elif tile == "D":
-                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
-                    red_img.fill((255, 0, 0))
-                    img_rect = red_img.get_rect()
+                    img_rect = door.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
-                    tile = (red_img, img_rect)
+                    tile = (door, img_rect)
                     self.tile_list.append(tile)
                 elif tile == "E":
-                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
-                    red_img.fill((255, 255, 0))
-                    img_rect = red_img.get_rect()
+                    img_rect = stairs.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
-                    tile = (red_img, img_rect)
+                    tile = (stairs, img_rect)
                     self.tile_list.append(tile)
                 elif tile == "P":
-                    red_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
-                    red_img.fill((0, 0, 255))
-                    img_rect = red_img.get_rect()
+                    img_rect = stairs.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
-                    tile = (red_img, img_rect)
+                    tile = (stairs, img_rect)
                     self.tile_list.append(tile)
                 elif tile == " ":
                     self.empty_tiles.append((col_count, row_count))
@@ -101,6 +109,22 @@ class World:
             return self.world_data[y // TILE_SIZE][x // TILE_SIZE]
         except IndexError:
             return " "
+
+    def open_door(self, x, y):
+        for i, tile in enumerate(self.tile_list):
+            if tile[1].x == x and tile[1].y == y and tile[0] == door:
+
+                self.tile_list[i] = (opened_door, tile[1])
+                break
+
+    def close_door(self, x, y):
+
+        for i, tile in enumerate(self.tile_list):
+
+            if tile[1].x == x and tile[1].y == y and tile[0] == opened_door:
+
+                self.tile_list[i] = (door, tile[1])
+                break
 
     @property
     def get_group(self):

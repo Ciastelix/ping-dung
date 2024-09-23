@@ -1,6 +1,6 @@
 import pygame
 from PIL import Image, ImageSequence
-from config import SCREEN_HEIGHT, SCREEN_WIDTH
+from config import SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE
 from pygame import mixer
 
 
@@ -46,6 +46,7 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.direction = 0
+        self.was_on_door_tile = False
 
     def check_collision(self, dx, dy, world):
         new_rect = self.rect.copy()
@@ -65,6 +66,12 @@ class Player:
 
     def on_portal_tile(self, world):
         return world.get_tile_at(self.rect.centerx, self.rect.centery) == "P"
+
+    def on_door_tile(self, world):
+        return world.get_tile_at(self.rect.centerx, self.rect.centery) == "D"
+
+    def stepped_off_door_tile(self, world):
+        return world.get_tile_at(self.rect.centerx, self.rect.centery) != "D"
 
     def update(self, world, screen, camera_x, camera_y):
         dx = 0
@@ -118,6 +125,19 @@ class Player:
             self.rect.x += dx
         if not self.check_collision(0, dy, world):
             self.rect.y += dy
+
+        # Change door image to red if on door tile
+        if self.on_door_tile(world):
+            world.open_door(
+                self.rect.centerx // TILE_SIZE * TILE_SIZE,
+                self.rect.centery // TILE_SIZE * TILE_SIZE,
+            )
+            self.was_on_door_tile = True
+            self.x_door = self.rect.centerx // TILE_SIZE * TILE_SIZE
+            self.y_door = self.rect.centery // TILE_SIZE * TILE_SIZE
+        elif self.was_on_door_tile:
+            world.close_door(self.x_door, self.y_door)
+            self.was_on_door_tile = False
 
         # Draw player onto screen with camera offset
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
