@@ -5,18 +5,13 @@ from random import choice
 
 brick = pygame.image.load("brick.png")
 brick = pygame.transform.scale(brick, (TILE_SIZE, TILE_SIZE))
+brick = pygame.transform.rotate(brick, 90)
 stairs = pygame.image.load("stairs.png")
 stairs = pygame.transform.scale(stairs, (TILE_SIZE, TILE_SIZE))
 door = pygame.image.load("door.png")
 door = pygame.transform.scale(door, (TILE_SIZE, TILE_SIZE))
 opened_door = pygame.image.load("opened_door.png")
 opened_door = pygame.transform.scale(opened_door, (TILE_SIZE, TILE_SIZE))
-bricks = [
-    brick,
-    pygame.transform.rotate(brick, 90),
-    pygame.transform.rotate(brick, 90),
-    pygame.transform.rotate(brick, 90),
-]
 
 frame = pygame.image.load("frame.png")
 black_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
@@ -42,7 +37,7 @@ class World:
                         row_count * TILE_SIZE,
                     )
                 if tile == "R":
-                    img = choice(bricks)
+                    img = brick
                     img_rect = img.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE

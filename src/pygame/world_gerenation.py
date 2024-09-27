@@ -4,13 +4,10 @@ import sys
 import heapq
 from button import Button
 
-
 pygame.init()
-
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 1000
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
 
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
@@ -26,10 +23,8 @@ MIN_ROOMS = 6
 ROOM_MIN_SIZE = 5
 ROOM_MAX_SIZE = 15
 
-
 dirt_img = pygame.image.load("dirt.jpg")
 grass_img = pygame.image.load("grass.jpeg")
-
 
 dirt_img = pygame.transform.scale(dirt_img, (TILE_SIZE, TILE_SIZE))
 grass_img = pygame.transform.scale(grass_img, (TILE_SIZE, TILE_SIZE))
@@ -169,6 +164,7 @@ def generate_dungeon():
                 corridor_entrances.append((cx, cy))
 
         chosen_entrances = []
+        corridor_to_room = {}
         for entrance in corridor_entrances:
             adjacent_corridors = [
                 (ex, ey)
@@ -177,9 +173,18 @@ def generate_dungeon():
             ]
             if not any(e in chosen_entrances for e in adjacent_corridors):
                 chosen_entrances.append(entrance)
+                for corridor in adjacent_corridors:
+                    corridor_to_room[corridor] = room
 
         for entrance in chosen_entrances:
-            game_map[entrance[1]][entrance[0]] = "D"
+            # Ensure there is at least one tile of space between doors
+            if all(
+                game_map[entrance[1] + dy][entrance[0] + dx] != "D"
+                for dx in [-1, 0, 1]
+                for dy in [-1, 0, 1]
+                if 0 <= entrance[0] + dx < WIDTH and 0 <= entrance[1] + dy < HEIGHT
+            ):
+                game_map[entrance[1]][entrance[0]] = "D"
 
     entrance_room = rooms[0] if rooms else None
     if entrance_room:

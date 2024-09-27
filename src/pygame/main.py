@@ -20,7 +20,6 @@ menu = pygame.image.load("menu.png")
 menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
 menu_music = pygame.mixer.Sound("menu.mp3")
 
-
 menu_music.set_volume(0.2)
 game_music = pygame.mixer.Sound("game.mp3")
 game_music.set_volume(0.2)
@@ -31,7 +30,6 @@ play_button_image = pygame.transform.scale(
     play_button_image,
     (play_button_image.get_width() * 3, play_button_image.get_height() * 3),
 )
-
 
 world_data = generate_dungeon()
 
@@ -52,6 +50,8 @@ transition_active = False
 
 enemy_spawn_time = 4000  # 4 seconds
 last_spawn_time = pygame.time.get_ticks()
+
+zoom_factor = 2  # Adjust this value to zoom in more or less
 
 
 def draw_level_counter(screen, level):
@@ -120,14 +120,35 @@ while run:
         if game_music.get_num_channels() == 0:
             game_music.play()
         screen.blit(bg_image, (0, 0))
-        camera_x = player.rect.x - SCREEN_WIDTH // 2
-        camera_y = player.rect.y - SCREEN_HEIGHT // 2
 
-        world.draw(screen, camera_x, camera_y, player)
+        # Adjust camera to zoom in on the player
+        camera_x = player.rect.x - SCREEN_WIDTH // (2 * zoom_factor)
+        camera_y = player.rect.y - SCREEN_HEIGHT // (2 * zoom_factor)
+
+        # Create a new surface for zooming with transparency
+        zoomed_surface = pygame.Surface(
+            (SCREEN_WIDTH // zoom_factor, SCREEN_HEIGHT // zoom_factor), pygame.SRCALPHA
+        )
+
+        # Clear the zoomed surface with transparency
+        zoomed_surface.fill((0, 0, 0, 0))
+
+        # Draw the world and player on the zoomed surface
+        world.draw(zoomed_surface, camera_x, camera_y, player)
+
+        # Scale the zoomed surface to the screen size
+        zoomed_surface = pygame.transform.scale(
+            zoomed_surface, (SCREEN_WIDTH, SCREEN_HEIGHT)
+        )
+
+        # Blit the zoomed surface to the screen
+        screen.blit(zoomed_surface, (0, 0))
+
         if player.on_portal_tile(world):
             transition_active = True
             transition_start_time = pygame.time.get_ticks()
 
+        # Draw the level counter after the zoomed surface and vision mask
         draw_level_counter(screen, level)
 
     pygame.display.update()
