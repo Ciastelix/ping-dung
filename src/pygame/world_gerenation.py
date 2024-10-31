@@ -211,7 +211,9 @@ def generate_dungeon():
         for entrance in chosen_entrances:
             if entrance not in corridor_doors:
                 corridor_doors[entrance] = 0
-            if corridor_doors[entrance] < 2:
+            if (
+                corridor_doors[entrance] < 1
+            ):  # Ensure only one corridor tile touches room tiles
                 corridor_doors[entrance] += 1
                 game_map[entrance[1]][entrance[0]] = "D"
 
