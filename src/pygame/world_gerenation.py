@@ -44,10 +44,10 @@ def generate_dungeon():
 
         new_room = {"x1": x, "y1": y, "x2": x + w, "y2": y + h}
         overlap = any(
-            new_room["x1"] - 1 <= room["x2"]
-            and new_room["x2"] + 1 >= room["x1"]
-            and new_room["y1"] - 1 <= room["y2"]
-            and new_room["y2"] + 1 >= room["y1"]
+            new_room["x1"] - 2 <= room["x2"]
+            and new_room["x2"] + 2 >= room["x1"]
+            and new_room["y1"] - 2 <= room["y2"]
+            and new_room["y2"] + 2 >= room["y1"]
             for room in rooms
         )
 
@@ -78,6 +78,7 @@ def generate_dungeon():
     heapq.heapify(edges)
 
     corridor_map = set()
+    corridor_doors = {}
 
     while len(connected_rooms) < len(room_centers):
         cost, (cx1, cy1), (cx2, cy2) = heapq.heappop(edges)
@@ -105,10 +106,41 @@ def generate_dungeon():
                     if game_map[cy2][x] == " ":
                         corridor_segments.append((x, cy2))
 
+            # Introduce deviations
+            if random.random() < 0.3:  # 30% chance to add deviation
+                deviation_length = random.randint(1, 3)
+                if random.randint(0, 1) == 0:
+                    for _ in range(deviation_length):
+                        if corridor_segments:
+                            last_segment = corridor_segments[-1]
+                            new_segment = (
+                                last_segment[0] + random.choice([-1, 1]),
+                                last_segment[1],
+                            )
+                            if (
+                                0 <= new_segment[0] < WIDTH
+                                and 0 <= new_segment[1] < HEIGHT
+                            ):
+                                corridor_segments.append(new_segment)
+                else:
+                    for _ in range(deviation_length):
+                        if corridor_segments:
+                            last_segment = corridor_segments[-1]
+                            new_segment = (
+                                last_segment[0],
+                                last_segment[1] + random.choice([-1, 1]),
+                            )
+                            if (
+                                0 <= new_segment[0] < WIDTH
+                                and 0 <= new_segment[1] < HEIGHT
+                            ):
+                                corridor_segments.append(new_segment)
+
             if len(corridor_segments) >= 3:
                 for x, y in corridor_segments:
                     game_map[y][x] = "."
                     corridor_map.add((x, y))
+                    corridor_doors[(x, y)] = 0
 
     for room in rooms:
         room_connected = False
@@ -148,8 +180,8 @@ def generate_dungeon():
 
     for room in rooms:
         room_perimeter = set()
-        for x in range(room["x1"] - 1, room["x2"] + 1):
-            for y in range(room["y1"] - 1, room["y2"] + 1):
+        for x in range(room["x1"] - 2, room["x2"] + 2):
+            for y in range(room["y1"] - 2, room["y2"] + 2):
                 if game_map[y][x] == ".":
                     room_perimeter.add((x, y))
 
@@ -177,13 +209,10 @@ def generate_dungeon():
                     corridor_to_room[corridor] = room
 
         for entrance in chosen_entrances:
-            # Ensure there is at least one tile of space between doors
-            if all(
-                game_map[entrance[1] + dy][entrance[0] + dx] != "D"
-                for dx in [-1, 0, 1]
-                for dy in [-1, 0, 1]
-                if 0 <= entrance[0] + dx < WIDTH and 0 <= entrance[1] + dy < HEIGHT
-            ):
+            if entrance not in corridor_doors:
+                corridor_doors[entrance] = 0
+            if corridor_doors[entrance] < 2:
+                corridor_doors[entrance] += 1
                 game_map[entrance[1]][entrance[0]] = "D"
 
     entrance_room = rooms[0] if rooms else None
@@ -205,6 +234,28 @@ def generate_dungeon():
         if game_map[p_y][p_x] == "R":
             game_map[p_y][p_x] = "P"
             break
+
+    # Add dead ends
+    for _ in range(random.randint(3, 6)):  # Random number of dead ends
+        if corridor_map:
+            dead_end_start = random.choice(list(corridor_map))
+            dead_end_length = random.randint(2, 5)
+            direction = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
+            for _ in range(dead_end_length):
+                new_segment = (
+                    dead_end_start[0] + direction[0],
+                    dead_end_start[1] + direction[1],
+                )
+                if (
+                    0 <= new_segment[0] < WIDTH
+                    and 0 <= new_segment[1] < HEIGHT
+                    and game_map[new_segment[1]][new_segment[0]] == " "
+                ):
+                    game_map[new_segment[1]][new_segment[0]] = "."
+                    corridor_map.add(new_segment)
+                    dead_end_start = new_segment
+                else:
+                    break
 
     return game_map, (e_x, e_y)
 

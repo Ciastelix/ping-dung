@@ -23,7 +23,7 @@ menu_music = pygame.mixer.Sound("menu.mp3")
 menu_music.set_volume(0.2)
 game_music = pygame.mixer.Sound("game.mp3")
 game_music.set_volume(0.2)
-bg_image = pygame.image.load("bg.webp")
+bg_image = pygame.image.load("bg.png")
 play_button_image = pygame.image.load("play.png")
 
 play_button_image = pygame.transform.scale(

@@ -1,4 +1,5 @@
 import pygame
+import math
 from config import SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE
 from pygame import mixer
 
@@ -23,9 +24,6 @@ pingu_back_move_2 = pygame.transform.scale(pingu_back_move_2, (45, 45))
 
 class Player:
     def __init__(self, x, y):
-        self.vision_mask = pygame.Surface(
-            (SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA
-        )
         self.index = 0
         pygame.mixer.pre_init(44100, -16, 2, 512)
         mixer.init()
@@ -76,6 +74,10 @@ class Player:
 
     def stepped_off_door_tile(self, world):
         return world.get_tile_at(self.rect.centerx, self.rect.centery) != "D"
+
+    def is_door_tile(self, world, x, y):
+        tile = world.get_tile_at(x, y)
+        return tile == "D"
 
     def update(self, world, screen, camera_x, camera_y):
         dx = 0
@@ -146,11 +148,3 @@ class Player:
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
 
         # Draw vision mask after the player and world
-        self.vision_mask.fill((0, 0, 0, 250))
-        pygame.draw.circle(
-            self.vision_mask,
-            (0, 0, 0, 0),
-            (self.rect.x - camera_x + 20, self.rect.y - camera_y + 20),
-            75,
-        )
-        screen.blit(self.vision_mask, (0, 0))
