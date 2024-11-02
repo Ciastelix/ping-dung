@@ -3,22 +3,21 @@ from enemy import Enemy
 from config import TILE_SIZE
 import numpy as np
 
-brick = pygame.image.load("brick.png")
+brick = pygame.image.load("images/ground/tile.png")
 brick = pygame.transform.scale(brick, (TILE_SIZE, TILE_SIZE))
 brick = pygame.transform.rotate(brick, 90)
-stairs = pygame.image.load("stairs.png")
+stairs = pygame.image.load("images/ground/tile_stairs.png")
 stairs = pygame.transform.scale(stairs, (TILE_SIZE, TILE_SIZE))
-door = pygame.image.load("door.png")
+door = pygame.image.load("images/ground/tile_door.png")
 door = pygame.transform.scale(door, (TILE_SIZE, TILE_SIZE))
-opened_door = pygame.image.load("opened_door.png")
+opened_door = pygame.image.load("images/ground/tile_door_opened.png")
 opened_door = pygame.transform.scale(opened_door, (TILE_SIZE, TILE_SIZE))
 
-frame = pygame.image.load("frame.png")
+frame = pygame.image.load("images/addons/frame.png")
 black_img = pygame.Surface((TILE_SIZE, TILE_SIZE))
 black_img.fill((0, 0, 0))
 
-RAYCASTING_DISTANCE = 1  # Increase to show more tiles
-NUM_RAYS = 10000
+RAYCASTING_DISTANCE = 2
 
 
 class World:
@@ -34,11 +33,13 @@ class World:
         for row in data:
             col_count = 0
             for tile in row:
+                # starting position
                 if tile == "E":
                     self.starting_position = (
                         col_count * TILE_SIZE,
                         row_count * TILE_SIZE,
                     )
+                # room
                 if tile == "R":
                     img = brick
                     img_rect = img.get_rect()
@@ -46,37 +47,38 @@ class World:
                     img_rect.y = row_count * TILE_SIZE
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
-                    self.rooms_and_corridors.append(
-                        (img_rect.x, img_rect.y)
-                    )  # Add room position to list
+                    self.rooms_and_corridors.append((img_rect.x, img_rect.y))  #
+                # corridor
                 elif tile == ".":
-                    img = frame
+                    img = brick
                     img_rect = img.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
-                    self.rooms_and_corridors.append(
-                        (img_rect.x, img_rect.y)
-                    )  # Add corridor position to list
+                    self.rooms_and_corridors.append((img_rect.x, img_rect.y))
+                # door
                 elif tile == "D":
                     img_rect = door.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
                     tile = (door, img_rect)
                     self.tile_list.append(tile)
+                # entrance
                 elif tile == "E":
                     img_rect = stairs.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
                     tile = (stairs, img_rect)
                     self.tile_list.append(tile)
+                # exit
                 elif tile == "P":
                     img_rect = stairs.get_rect()
                     img_rect.x = col_count * TILE_SIZE
                     img_rect.y = row_count * TILE_SIZE
                     tile = (stairs, img_rect)
                     self.tile_list.append(tile)
+                # empty tile
                 elif tile == " ":
                     self.empty_tiles.append((col_count, row_count))
 

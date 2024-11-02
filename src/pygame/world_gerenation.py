@@ -14,6 +14,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 PINK = (255, 192, 203)
+YELLOW = (255, 255, 0)
 
 TILE_SIZE = 20
 WIDTH = SCREEN_WIDTH // TILE_SIZE
@@ -22,12 +23,6 @@ MAX_ROOMS = 10
 MIN_ROOMS = 6
 ROOM_MIN_SIZE = 5
 ROOM_MAX_SIZE = 15
-
-dirt_img = pygame.image.load("dirt.jpg")
-grass_img = pygame.image.load("grass.jpeg")
-
-dirt_img = pygame.transform.scale(dirt_img, (TILE_SIZE, TILE_SIZE))
-grass_img = pygame.transform.scale(grass_img, (TILE_SIZE, TILE_SIZE))
 
 
 def generate_dungeon():
@@ -106,35 +101,26 @@ def generate_dungeon():
                     if game_map[cy2][x] == " ":
                         corridor_segments.append((x, cy2))
 
-            # Introduce deviations
-            if random.random() < 0.3:  # 30% chance to add deviation
-                deviation_length = random.randint(1, 3)
-                if random.randint(0, 1) == 0:
+            # Introduce deviations to make corridors less direct
+            deviation_chance = 0.5  # 50% chance to add deviation
+            for i in range(len(corridor_segments) - 1):
+                if random.random() < deviation_chance:
+                    deviation_length = random.randint(1, 3)
+                    direction = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
                     for _ in range(deviation_length):
-                        if corridor_segments:
-                            last_segment = corridor_segments[-1]
-                            new_segment = (
-                                last_segment[0] + random.choice([-1, 1]),
-                                last_segment[1],
-                            )
-                            if (
-                                0 <= new_segment[0] < WIDTH
-                                and 0 <= new_segment[1] < HEIGHT
-                            ):
-                                corridor_segments.append(new_segment)
-                else:
-                    for _ in range(deviation_length):
-                        if corridor_segments:
-                            last_segment = corridor_segments[-1]
-                            new_segment = (
-                                last_segment[0],
-                                last_segment[1] + random.choice([-1, 1]),
-                            )
-                            if (
-                                0 <= new_segment[0] < WIDTH
-                                and 0 <= new_segment[1] < HEIGHT
-                            ):
-                                corridor_segments.append(new_segment)
+                        last_segment = corridor_segments[-1]
+                        new_segment = (
+                            last_segment[0] + direction[0],
+                            last_segment[1] + direction[1],
+                        )
+                        if (
+                            0 <= new_segment[0] < WIDTH
+                            and 0 <= new_segment[1] < HEIGHT
+                            and game_map[new_segment[1]][new_segment[0]] == " "
+                        ):
+                            corridor_segments.append(new_segment)
+                        else:
+                            break
 
             if len(corridor_segments) >= 3:
                 for x, y in corridor_segments:
@@ -241,6 +227,14 @@ def generate_dungeon():
     for _ in range(random.randint(3, 6)):  # Random number of dead ends
         if corridor_map:
             dead_end_start = random.choice(list(corridor_map))
+            # Ensure dead end start is at least one block away from any room
+            while any(
+                room["x1"] - 1 <= dead_end_start[0] <= room["x2"] + 1
+                and room["y1"] - 1 <= dead_end_start[1] <= room["y2"] + 1
+                for room in rooms
+            ):
+                dead_end_start = random.choice(list(corridor_map))
+
             dead_end_length = random.randint(2, 5)
             direction = random.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
             for _ in range(dead_end_length):
@@ -269,9 +263,9 @@ def draw_dungeon(game_map):
             if tile == " ":
                 pygame.draw.rect(screen, BLACK, rect)
             elif tile == "R":
-                screen.blit(dirt_img, rect)
+                pygame.draw.rect(screen, PINK, rect)
             elif tile == ".":
-                screen.blit(grass_img, rect)
+                pygame.draw.rect(screen, YELLOW, rect)
             elif tile == "D":
                 pygame.draw.rect(screen, RED, rect)
             elif tile == "E":
@@ -300,7 +294,7 @@ def main():
     clock = pygame.time.Clock()
     game_map, entrance_pos = generate_dungeon()
 
-    play_button = pygame.image.load("play.png")
+    play_button = pygame.image.load("images/addons/play.png")
 
     play_button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, play_button)
     while True:

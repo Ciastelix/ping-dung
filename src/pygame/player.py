@@ -27,7 +27,7 @@ class Player:
         self.index = 0
         pygame.mixer.pre_init(44100, -16, 2, 512)
         mixer.init()
-        self.walk_music = pygame.mixer.Sound("walk.mp3")
+        self.walk_music = pygame.mixer.Sound("music/gameplay/walk.mp3")
         self.walk_music.set_volume(1000.2)
         self.counter = 0
         self.direction = 0

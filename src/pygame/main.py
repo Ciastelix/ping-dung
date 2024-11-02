@@ -5,7 +5,7 @@ from player import Player
 from world_gerenation import generate_dungeon
 from button import Button
 from pygame import mixer
-from transition import draw_transition, start_transition
+from transition import draw_transition
 from config import SCREEN_WIDTH, SCREEN_HEIGHT, TILE_SIZE
 
 pygame.mixer.pre_init(44100, -16, 2, 512)
@@ -15,16 +15,16 @@ clock = pygame.time.Clock()
 fps = 60
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Marrio")
-menu = pygame.image.load("menu.png")
+pygame.display.set_caption("Ping Dung")
+menu = pygame.image.load("images/addons/menu.png")
 menu = pygame.transform.scale(menu, (SCREEN_WIDTH, SCREEN_HEIGHT))
-menu_music = pygame.mixer.Sound("menu.mp3")
+menu_music = pygame.mixer.Sound("music/menu/menu.mp3")
 
 menu_music.set_volume(0.2)
-game_music = pygame.mixer.Sound("game.mp3")
+game_music = pygame.mixer.Sound("music/gameplay/game.mp3")
 game_music.set_volume(0.2)
-bg_image = pygame.image.load("bg.png")
-play_button_image = pygame.image.load("play.png")
+bg_image = pygame.image.load("images/addons/bg.png")
+play_button_image = pygame.image.load("images/addons/play.png")
 
 play_button_image = pygame.transform.scale(
     play_button_image,
