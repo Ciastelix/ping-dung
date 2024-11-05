@@ -145,8 +145,25 @@ class World:
     def get_valid_enemy_positions(self):
         return self.rooms_and_corridors
 
-    def spawn_enemy(self, position):
-        pass
+    def is_player_in_room(self, player, room_position):
+        player_x, player_y = player.rect.x // TILE_SIZE, player.rect.y // TILE_SIZE
+        room_x, room_y = room_position[0] // TILE_SIZE, room_position[1] // TILE_SIZE
+        return player_x == room_x and player_y == room_y
+
+    def spawn_enemy(self, player):
+        valid_positions = self.get_valid_enemy_positions()
+        for position in valid_positions:
+            if not self.is_player_in_room(player, position):
+                enemies_in_room = [
+                    enemy
+                    for enemy in self.cobra_group
+                    if (enemy.rect.x // TILE_SIZE, enemy.rect.y // TILE_SIZE)
+                    == (position[0] // TILE_SIZE, position[1] // TILE_SIZE)
+                ]
+                if len(enemies_in_room) < 2:
+                    enemy = Enemy(position[0], position[1])
+                    self.cobra_group.add(enemy)
+                    break
 
     def get_visible_tiles(self, player):
         player_x, player_y = player.rect.x // TILE_SIZE, player.rect.y // TILE_SIZE

@@ -78,7 +78,7 @@ def spawn_enemy_in_random_location():
         if valid_positions:
             random_position = random.choice(valid_positions)
             if not player_is_in_position(random_position):
-                world.spawn_enemy(random_position)
+                world.spawn_enemy(player)  # Pass the player object here
 
 
 def player_is_in_position(position):
@@ -97,9 +97,10 @@ def calculate_walking_animation_duration(player, fps=60):
 
 menu_music.play(-1)
 # Inside the main game loop in main.py
+# Inside the main game loop in main.py
 while run:
     clock.tick(fps)
-    spawn_enemy_in_random_location()
+    spawn_enemy_in_random_location()  # This is the correct place
 
     if transition_active:
         elapsed_time = pygame.time.get_ticks() - transition_start_time
