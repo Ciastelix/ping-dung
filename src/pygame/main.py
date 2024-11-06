@@ -97,7 +97,6 @@ def calculate_walking_animation_duration(player, fps=60):
 
 menu_music.play(-1)
 # Inside the main game loop in main.py
-# Inside the main game loop in main.py
 while run:
     clock.tick(fps)
     spawn_enemy_in_random_location()  # This is the correct place
@@ -109,7 +108,6 @@ while run:
         if elapsed_time >= transition_time:
             transition_active = False
             load_next_level()
-            level += 1
 
     elif main_menu:
         screen.blit(menu, (0, 0))
