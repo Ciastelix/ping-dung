@@ -1,34 +1,30 @@
 import pygame
-import math
-from config import SCREEN_HEIGHT, SCREEN_WIDTH, TILE_SIZE
+from config import TILE_SIZE
 from pygame import mixer
 
+
 # Load and scale images
-pingu_front = pygame.image.load("images/pingu/pingu_idle.png")
-pingu_front = pygame.transform.scale(pingu_front, (45, 45))
-pingu_front_breathe = pygame.image.load("images/pingu/pingu_idle_stop.png")
-pingu_front_breathe = pygame.transform.scale(pingu_front_breathe, (45, 45))
-pingu_front_move_1 = pygame.image.load("images/pingu/pingu_move_1.png")
-pingu_front_move_1 = pygame.transform.scale(pingu_front_move_1, (45, 45))
-pingu_front_move_2 = pygame.image.load("images/pingu/pingu_move_2.png")
-pingu_front_move_2 = pygame.transform.scale(pingu_front_move_2, (45, 45))
-pingu_side_move_1 = pygame.image.load("images/pingu/pingu_move_side_1.png")
-pingu_side_move_1 = pygame.transform.scale(pingu_side_move_1, (45, 45))
-pingu_side_move_2 = pygame.image.load("images/pingu/pingu_move_side_2.png")
-pingu_side_move_2 = pygame.transform.scale(pingu_side_move_2, (45, 45))
-pingu_back_move_1 = pygame.image.load("images/pingu/pingu_move_back_1.png")
-pingu_back_move_1 = pygame.transform.scale(pingu_back_move_1, (45, 45))
-pingu_back_move_2 = pygame.image.load("images/pingu/pingu_move_back_2.png")
-pingu_back_move_2 = pygame.transform.scale(pingu_back_move_2, (45, 45))
+def load_and_scale_image(path, size):
+    image = pygame.image.load(path)
+    return pygame.transform.scale(image, size)
+
+
+pingu_front = load_and_scale_image("images/pingu/pingu_idle.png", (45, 45))
+pingu_front_breathe = load_and_scale_image("images/pingu/pingu_idle_stop.png", (45, 45))
+pingu_front_move_1 = load_and_scale_image("images/pingu/pingu_move_1.png", (45, 45))
+pingu_front_move_2 = load_and_scale_image("images/pingu/pingu_move_2.png", (45, 45))
+pingu_side_move_1 = load_and_scale_image("images/pingu/pingu_move_side_1.png", (45, 45))
+pingu_side_move_2 = load_and_scale_image("images/pingu/pingu_move_side_2.png", (45, 45))
+pingu_back_move_1 = load_and_scale_image("images/pingu/pingu_move_back_1.png", (45, 45))
+pingu_back_move_2 = load_and_scale_image("images/pingu/pingu_move_back_2.png", (45, 45))
 
 
 class Player:
     def __init__(self, x, y):
         self.index = 0
-        pygame.mixer.pre_init(44100, -16, 2, 512)
         mixer.init()
         self.walk_music = pygame.mixer.Sound("music/gameplay/walk.mp3")
-        self.walk_music.set_volume(1000.2)
+        self.walk_music.set_volume(0.2)
         self.counter = 0
         self.direction = 0
 
@@ -40,7 +36,6 @@ class Player:
         self.height = self.image.get_height()
         self.vel_x = 0
         self.vel_y = 0
-        self.direction = 0
         self.was_on_door_tile = False
 
         self.idle_images = [pingu_front, pingu_front_breathe]
@@ -74,10 +69,6 @@ class Player:
 
     def stepped_off_door_tile(self, world):
         return world.get_tile_at(self.rect.centerx, self.rect.centery) != "D"
-
-    def is_door_tile(self, world, x, y):
-        tile = world.get_tile_at(x, y)
-        return tile == "D"
 
     def update(self, world, screen, camera_x, camera_y):
         dx = 0
@@ -146,5 +137,3 @@ class Player:
             self.was_on_door_tile = False
 
         screen.blit(self.image, (self.rect.x - camera_x, self.rect.y - camera_y))
-
-        # Draw vision mask after the player and world

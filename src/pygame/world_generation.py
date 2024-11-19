@@ -2,20 +2,10 @@ import pygame
 import random
 import sys
 import heapq
-from button import Button
 
 pygame.init()
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 1000, 1000
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-RED = (255, 0, 0)
-PINK = (255, 192, 203)
-YELLOW = (255, 255, 0)
-
 TILE_SIZE = 20
 WIDTH = SCREEN_WIDTH // TILE_SIZE
 HEIGHT = SCREEN_HEIGHT // TILE_SIZE
@@ -254,64 +244,3 @@ def generate_dungeon():
                     break
 
     return game_map, (e_x, e_y)
-
-
-def draw_dungeon(game_map):
-    for y, row in enumerate(game_map):
-        for x, tile in enumerate(row):
-            rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-            if tile == " ":
-                pygame.draw.rect(screen, BLACK, rect)
-            elif tile == "R":
-                pygame.draw.rect(screen, PINK, rect)
-            elif tile == ".":
-                pygame.draw.rect(screen, YELLOW, rect)
-            elif tile == "D":
-                pygame.draw.rect(screen, RED, rect)
-            elif tile == "E":
-                pygame.draw.rect(screen, GREEN, rect)
-            elif tile == "P":
-                pygame.draw.rect(screen, BLUE, rect)
-
-    # Draw pink outlines for rooms
-    for y, row in enumerate(game_map):
-        for x, tile in enumerate(row):
-            if tile == "R":
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        if 0 <= x + dx < WIDTH and 0 <= y + dy < HEIGHT:
-                            if game_map[y + dy][x + dx] == " ":
-                                outline_rect = pygame.Rect(
-                                    (x + dx) * TILE_SIZE,
-                                    (y + dy) * TILE_SIZE,
-                                    TILE_SIZE,
-                                    TILE_SIZE,
-                                )
-                                pygame.draw.rect(screen, PINK, outline_rect, 1)
-
-
-def main():
-    clock = pygame.time.Clock()
-    game_map, entrance_pos = generate_dungeon()
-
-    play_button = pygame.image.load("images/addons/play.png")
-
-    play_button = Button(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2, play_button)
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        clock.tick(60)
-        keys = pygame.key.get_pressed()
-
-        screen.fill(BLACK)
-        draw_dungeon(game_map)
-
-        pygame.display.flip()
-        play_button.draw(screen)
-
-
-if __name__ == "__main__":
-    main()

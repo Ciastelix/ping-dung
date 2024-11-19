@@ -2,7 +2,7 @@ import pygame
 import random
 from world import World
 from player import Player
-from world_gerenation import generate_dungeon
+from world_generation import generate_dungeon
 from button import Button
 from pygame import mixer
 from transition import draw_transition
@@ -86,13 +86,6 @@ def player_is_in_position(position):
     return player_rect.colliderect(
         pygame.Rect(position[0], position[1], TILE_SIZE, TILE_SIZE)
     )
-
-
-def calculate_walking_animation_duration(player, fps=60):
-    number_of_frames = len(player.images_right)
-    walk_cooldown = 5
-    duration = (number_of_frames * walk_cooldown) / fps
-    return duration
 
 
 menu_music.play(-1)
